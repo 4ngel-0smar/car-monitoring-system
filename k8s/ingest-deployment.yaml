@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingest-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ingest-service
+  template:
+    metadata:
+      labels:
+        app: ingest-service
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: ingest-service
+        image: registry.digitalocean.com/car-monitoring-osmar/ingest-service:latest
+        ports:
+        - containerPort: 8000
