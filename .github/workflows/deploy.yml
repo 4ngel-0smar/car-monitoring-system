@@ -19,26 +19,32 @@ jobs:
       with:
         token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
-    - name: Log in to DigitalOcean Registry
+    - name: Registry Login
       run: doctl registry login --expiry-seconds 1200
 
-    - name: Build Docker image
-      run: |
-        docker build -t ingest-service ./services/ingest-service
+    - name: Build ingest-service
+      run: docker build -t ingest-service ./services/ingest-service
 
-    - name: Tag Docker image
-      run: |
-        docker tag ingest-service registry.digitalocean.com/car-monitoring-osmar/ingest-service:latest
+    - name: Build processing-service
+      run: docker build -t processing-service ./services/processing-service
 
-    - name: Push Docker image
-      run: |
-        docker push registry.digitalocean.com/car-monitoring-osmar/ingest-service:latest
+    - name: Tag ingest-service
+      run: docker tag ingest-service registry.digitalocean.com/car-monitoring-osmar/ingest-service:latest
 
-    - name: Save kubeconfig
-      run: |
-        doctl kubernetes cluster kubeconfig save car-monitoring-cluster
+    - name: Tag processing-service
+      run: docker tag processing-service registry.digitalocean.com/car-monitoring-osmar/processing-service:latest
 
-    - name: Deploy to Kubernetes
+    - name: Push ingest-service
+      run: docker push registry.digitalocean.com/car-monitoring-osmar/ingest-service:latest
+
+    - name: Push processing-service
+      run: docker push registry.digitalocean.com/car-monitoring-osmar/processing-service:latest
+
+    - name: Kubeconfig
+      run: doctl kubernetes cluster kubeconfig save car-monitoring-cluster
+
+    - name: Deploy
       run: |
         kubectl apply -f k8s/
         kubectl rollout restart deployment ingest-service
+        kubectl rollout restart deployment processing-service
