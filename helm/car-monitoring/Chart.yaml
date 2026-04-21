@@ -1,0 +1,6 @@
+apiVersion: v2
+name: car-monitoring
+description: Car Monitoring Microservices Platform
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

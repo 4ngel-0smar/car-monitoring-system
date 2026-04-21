@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  replicas: {{ .Values.gateway.replicas }}
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      imagePullSecrets:
+      - name: registry-car-monitoring-osmar
+      containers:
+      - name: api-gateway
+        image: {{ .Values.gateway.image }}
+        ports:
+        - containerPort: 80

@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: processing-service
+spec:
+  replicas: {{ .Values.processing.replicas }}
+  selector:
+    matchLabels:
+      app: processing-service
+  template:
+    metadata:
+      labels:
+        app: processing-service
+    spec:
+      imagePullSecrets:
+      - name: registry-car-monitoring-osmar
+      containers:
+      - name: processing-service
+        image: {{ .Values.processing.image }}
+        ports:
+        - containerPort: 80

@@ -19,3 +19,22 @@ spec:
         image: registry.digitalocean.com/car-monitoring-osmar/ingest-service:processing
         ports:
         - containerPort: 8000
+
+        env:
+          - name: DB_HOST
+            value: "car-monitoring-db-do-user-14980528-0.e.db.ondigitalocean.com"
+
+          - name: DB_PORT
+            value: "25060"
+
+          - name: DB_NAME
+            value: "defaultdb"
+
+          - name: DB_USER
+            value: "doadmin"
+
+          - name: DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: db-secret
+                key: DB_PASS

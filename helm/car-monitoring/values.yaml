@@ -1,0 +1,16 @@
+namespace: default
+
+ingest:
+  image: registry.digitalocean.com/car-monitoring-osmar/ingest-service:latest
+  replicas: 2
+  port: 80
+
+processing:
+  image: registry.digitalocean.com/car-monitoring-osmar/ingest-service:processing
+  replicas: 2
+  port: 80
+
+gateway:
+  image: registry.digitalocean.com/car-monitoring-osmar/ingest-service:gateway
+  replicas: 2
+  port: 80

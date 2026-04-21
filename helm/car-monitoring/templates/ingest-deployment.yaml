@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingest-service
+spec:
+  replicas: {{ .Values.ingest.replicas }}
+  selector:
+    matchLabels:
+      app: ingest-service
+  template:
+    metadata:
+      labels:
+        app: ingest-service
+    spec:
+      imagePullSecrets:
+      - name: registry-car-monitoring-osmar
+      containers:
+      - name: ingest-service
+        image: {{ .Values.ingest.image }}
+        ports:
+        - containerPort: 80
