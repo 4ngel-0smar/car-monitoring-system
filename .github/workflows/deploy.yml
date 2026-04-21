@@ -28,17 +28,26 @@ jobs:
     - name: Build processing-service
       run: docker build -t processing-service ./services/processing-service
 
+    - name: Build api-gateway
+      run: docker build -t api-gateway ./services/api-gateway
+
     - name: Tag ingest-service
       run: docker tag ingest-service registry.digitalocean.com/car-monitoring-osmar/ingest-service:latest
 
     - name: Tag processing-service
-      run: docker tag processing-service registry.digitalocean.com/car-monitoring-osmar/processing-service:latest
+      run: docker tag processing-service registry.digitalocean.com/car-monitoring-osmar/ingest-service:processing
+
+    - name: Tag api-gateway
+      run: docker tag api-gateway registry.digitalocean.com/car-monitoring-osmar/ingest-service:gateway
 
     - name: Push ingest-service
       run: docker push registry.digitalocean.com/car-monitoring-osmar/ingest-service:latest
 
     - name: Push processing-service
-      run: docker push registry.digitalocean.com/car-monitoring-osmar/processing-service:latest
+      run: docker push registry.digitalocean.com/car-monitoring-osmar/ingest-service:processing
+
+    - name: Push api-gateway
+      run: docker push registry.digitalocean.com/car-monitoring-osmar/ingest-service:gateway
 
     - name: Kubeconfig
       run: doctl kubernetes cluster kubeconfig save car-monitoring-cluster
@@ -48,3 +57,4 @@ jobs:
         kubectl apply -f k8s/
         kubectl rollout restart deployment ingest-service
         kubectl rollout restart deployment processing-service
+        kubectl rollout restart deployment api-gateway
