@@ -10,8 +10,8 @@ class Telemetry(BaseModel):
     temp: float
     battery: float
 
-def save_to_db(rpm, temp, battery, alerts):
-    conn = psycopg2.connect(
+def get_conn():
+    return psycopg2.connect(
         host=os.environ["DB_HOST"],
         port=os.environ["DB_PORT"],
         dbname=os.environ["DB_NAME"],
@@ -19,17 +19,6 @@ def save_to_db(rpm, temp, battery, alerts):
         password=os.environ["DB_PASS"],
         sslmode="require"
     )
-
-    cur = conn.cursor()
-
-    cur.execute("""
-        INSERT INTO telemetry (rpm, temperature, battery, alerts)
-        VALUES (%s, %s, %s, %s)
-    """, (rpm, temp, battery, alerts))
-
-    conn.commit()
-    cur.close()
-    conn.close()
 
 @app.get("/")
 def root():
@@ -42,24 +31,55 @@ def analyze(data: Telemetry):
 
     if data.rpm > 6000:
         alerts.append("RPM alta")
-
     if data.temp > 100:
         alerts.append("Temperatura alta")
-
     if data.battery < 12:
         alerts.append("Bateria baja")
-
     if not alerts:
         alerts.append("Sin alertas")
 
-    save_to_db(
-        data.rpm,
-        data.temp,
-        data.battery,
-        ", ".join(alerts)
-    )
+    conn = get_conn()
+    cur = conn.cursor()
 
-    return {
-        "received": data.dict(),
-        "alerts": alerts
-    }
+    cur.execute("""
+        INSERT INTO telemetry (rpm, temperature, battery, alerts)
+        VALUES (%s,%s,%s,%s)
+    """, (data.rpm, data.temp, data.battery, ", ".join(alerts)))
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return {"received": data.dict(), "alerts": alerts}
+
+@app.get("/history")
+def history():
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT id, rpm, temperature, battery, alerts, created_at
+        FROM telemetry
+        ORDER BY id DESC
+        LIMIT 20
+    """)
+
+    rows = cur.fetchall()
+
+    data = []
+
+    for row in rows:
+        data.append({
+            "id": row[0],
+            "rpm": row[1],
+            "temperature": row[2],
+            "battery": row[3],
+            "alerts": row[4],
+            "created_at": str(row[5])
+        })
+
+    cur.close()
+    conn.close()
+
+    return data
