@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Premium Car Dashboard</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top,#1a1a1a,#050505 60%);color:#fff;min-height:100vh;padding:24px}.wrap{max-width:1200px;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.brand{font-size:28px;font-weight:700;letter-spacing:.08em}.status{padding:8px 14px;border-radius:999px;background:#0f2; color:#021; font-weight:700}.grid{display:grid;grid-template-columns:2fr 1fr;gap:20px}.card{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:24px;backdrop-filter:blur(12px);box-shadow:0 20px 40px rgba(0,0,0,.35)}.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:20px}.speed{font-size:96px;font-weight:800;line-height:1}.muted{color:#aaa}.gauge{height:12px;background:#222;border-radius:999px;overflow:hidden;margin-top:10px}.fill{height:100%;background:linear-gradient(90deg,#00e5ff,#00ff8a);width:0%}.sidecol{display:grid;gap:20px}.metric{display:flex;justify-content:space-between;align-items:center;font-size:22px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}.alerts{min-height:120px}.alert{padding:12px 14px;border-radius:16px;background:rgba(255,80,80,.14);margin:10px 0;color:#ff8e8e}.ok{padding:12px 14px;border-radius:16px;background:rgba(80,255,140,.14);color:#8fffb2}.controls{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}.btn{border:none;padding:14px 18px;border-radius:16px;font-weight:700;cursor:pointer}.primary{background:#fff;color:#111}.secondary{background:#1b1b1b;color:#fff;border:1px solid rgba(255,255,255,.08)}@media(max-width:900px){.grid,.hero{grid-template-columns:1fr}.speed{font-size:72px}}
+</style>
+</head>
+<body>
+<div class='wrap'>
+<div class='top'>
+<div class='brand'>TESLA / BMW INSPIRED</div>
+<div class='status' id='online'>ONLINE</div>
+</div>
+<div class='grid'>
+<div class='card hero'>
+<div>
+<div class='muted'>Current RPM</div>
+<div class='speed' id='rpm'>0</div>
+<div class='muted'>engine performance</div>
+<div class='gauge'><div class='fill' id='rpmBar'></div></div>
+<div class='controls'>
+<button class='btn primary' onclick='simulate()'>Simulate Drive</button>
+<button class='btn secondary' onclick='safeMode()'>Eco Mode</button>
+</div>
+</div>
+<div>
+<div class='metric'><span>Temperature</span><strong id='temp'>0°C</strong></div>
+<div class='metric'><span>Battery</span><strong id='battery'>0V</strong></div>
+<div class='metric'><span>Vehicle State</span><strong id='state'>Idle</strong></div>
+</div>
+</div>
+<div class='sidecol'>
+<div class='card alerts'>
+<div class='muted'>System Alerts</div>
+<div id='alerts' class='ok'>All systems normal</div>
+</div>
+<div class='card'>
+<div class='muted'>Live Network</div>
+<div style='font-size:34px;font-weight:800;margin-top:10px'>Kubernetes Active</div>
+<div class='muted'>Microservices connected</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+async function send(data){try{const r=await fetch('http://159.89.245.252/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});return await r.json();}catch(e){return {alerts:['Gateway offline']}}}
+async function simulate(){const data={rpm:Math.floor(Math.random()*7000),temp:Math.floor(Math.random()*120),battery:(10+Math.random()*3).toFixed(1)};render(data);const j=await send(data);paintAlerts(j.alerts)}
+function safeMode(){const data={rpm:1800,temp:72,battery:12.5};render(data);paintAlerts(['Sin alertas'])}
+function render(d){document.getElementById('rpm').innerText=d.rpm;document.getElementById('temp').innerText=d.temp+'°C';document.getElementById('battery').innerText=d.battery+'V';document.getElementById('state').innerText=d.rpm>0?'Driving':'Idle';document.getElementById('rpmBar').style.width=Math.min(100,d.rpm/70)+'%'}
+function paintAlerts(arr){const el=document.getElementById('alerts');if(arr.includes('Sin alertas')||arr.includes('All systems normal')){el.className='ok';el.innerHTML='All systems normal';return;}el.className='';el.innerHTML=arr.map(a=>'<div class="alert">'+a+'</div>').join('');}
+</script>
+</body>
+</html>
