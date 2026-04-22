@@ -1,89 +1,118 @@
-# Simulador GPS — Algoritmos de Dijkstra y Bellman-Ford
+# 🚗 Car Monitoring System - Microservicios con Kubernetes
 
-Este programa es una aplicación con interfaz gráfica que permite crear y simular grafos dirigidos, mostrando cómo funcionan los algoritmos de **Dijkstra** y **Bellman-Ford** para encontrar el camino más corto entre dos puntos.  
-Se pueden agregar nodos, conectarlos con pesos personalizados y visualizar los resultados directamente en pantalla.
-
----
-
-## Características principales
-
-- Permite **crear nodos** haciendo clic en el lienzo.  
-- Se pueden **conectar los nodos** indicando el peso de cada arista.  
-- Muestra el **camino más corto** con un color diferente.  
-- Ofrece dos algoritmos de cálculo:
-  - Dijkstra (para grafos sin pesos negativos)
-  - Bellman-Ford (permite pesos negativos)
-- Incluye una opción para **comparar el rendimiento** de ambos algoritmos.  
-- Se puede **guardar** y **cargar** grafos en formato JSON.  
-- Permite **exportar una imagen** del grafo en formato PNG.  
-- Incluye botones para **limpiar** todo y empezar de nuevo.
+Sistema distribuido basado en microservicios para el monitoreo de telemetría de un vehículo en tiempo real.  
+Incluye procesamiento de datos, generación de alertas y visualización en un dashboard web.
 
 ---
 
-## Requisitos
+## 📌 Objetivo
 
-Antes de ejecutar el programa, asegúrate de tener instalado **Python 3.8 o superior**.  
-También es necesario tener las siguientes librerías:
+Desarrollar, contenerizar y desplegar una aplicación basada en microservicios utilizando Kubernetes (DOKS), con integración de CI/CD y un flujo completo desde backend hasta frontend.
+
+---
+
+## 🧱 Arquitectura
+
+El sistema está compuesto por varios microservicios desplegados en un clúster de Kubernetes.
+
+### Componentes principales:
+
+- Frontend (Dashboard React)
+- API Gateway
+- Processing Service
+- Ingest Service
+- Base de datos PostgreSQL
+
+---
+
+## ⚙️ Tecnologías utilizadas
+
+- Frontend: React + Vite  
+- Backend: FastAPI  
+- Base de datos: PostgreSQL (Managed en DigitalOcean)  
+- Contenedores: Docker  
+- Orquestación: Kubernetes (DOKS)  
+- CI/CD: GitHub Actions  
+- Registro de imágenes: DigitalOcean Container Registry  
+
+---
+
+## 🧩 Microservicios
+
+### 1. API Gateway
+- Punto de entrada del sistema
+- Maneja todas las peticiones del frontend
+- Redirige a los servicios internos
+
+**Endpoints:**
+- `POST /analyze`
+- `GET /history`
+
+---
+
+### 2. Processing Service
+- Procesa la telemetría
+- Genera alertas
+- Guarda datos en la base de datos
+
+**Ejemplo de alertas:**
+- RPM alta
+- Temperatura alta
+- Batería baja
+
+---
+
+### 3. Ingest Service
+- Simula o recibe datos de sensores
+- Representa la entrada de datos del sistema
+
+---
+
+### 4. Dashboard (Frontend)
+- Visualiza datos en tiempo real
+- Muestra historial de telemetría
+- Interfaz de usuario
+
+---
+
+## 📊 Flujo del sistema
+
+1. El frontend envía datos al API Gateway  
+2. El API Gateway redirige al Processing Service  
+3. El Processing Service:
+   - Analiza los datos
+   - Genera alertas
+   - Guarda información en la base de datos  
+4. El frontend consulta el historial para mostrar telemetría  
+
+---
+
+## 🚀 Despliegue
+
+El sistema está desplegado en un clúster de Kubernetes utilizando DigitalOcean Kubernetes (DOKS).
+
+### Servicios expuestos:
+- API Gateway
+- Processing Service
+- Dashboard React
+
+---
+
+## 🔄 CI/CD
+
+El pipeline automatizado realiza:
+
+1. Build de imágenes Docker  
+2. Push al Container Registry  
+3. Deploy automático a Kubernetes  
+
+---
+
+## 🧪 Ejemplo de uso
+
+### Enviar datos:
 
 ```bash
-pip install networkx matplotlib
-```
-
-Tkinter viene incluido con Python en la mayoría de los sistemas, pero si no lo tienes:
-
-```bash
-sudo apt-get install python3-tk
-```
-
----
-
-## Cómo usarlo
-
-1. Ejecuta el archivo principal:
-
-   ```bash
-   python dijkstra.py
-   ```
-
-2. En la ventana que se abre:
-   - Usa los botones de modo para agregar nodos o conectarlos.  
-   - Escribe el peso de la arista en el campo correspondiente.  
-   - Define los nodos de **origen** y **destino** (también puedes seleccionarlos haciendo clic).  
-   - Haz clic en **Ejecutar Dijkstra** o **Ejecutar Bellman-Ford** para calcular el camino más corto.  
-   - Usa **Comparar rendimiento** para ver qué algoritmo es más rápido.  
-
-3. Puedes guardar el grafo, cargar otro o exportar la imagen en cualquier momento.
-
----
-
-## Ejemplo rápido
-
-1. Agrega tres nodos: `A`, `B` y `C`.  
-2. Conéctalos así:
-   - A → B con peso 2  
-   - B → C con peso 3  
-   - A → C con peso 6  
-3. Define `A` como origen y `C` como destino.  
-4. Ejecuta **Dijkstra**.  
-   Verás que el camino más corto es **A → B → C** con una distancia total de **5**.
-
----
-
-## Formato de los archivos guardados
-
-Cuando guardas un grafo, se crea un archivo `.json` con una estructura similar a esta:
-
-```json
-{
-  "nodos": {"A": [100, 200], "B": [300, 200]},
-  "aristas": {"A": {"B": 2}, "B": {}}
-}
-```
-
----
-
-## Notas finales
-
-El programa fue pensado como una herramienta educativa para visualizar cómo trabajan los algoritmos de caminos más cortos.  
-Es útil para practicar grafos, entender el funcionamiento de Dijkstra y Bellman-Ford y comparar su desempeño en distintos escenarios.
-
+curl -X POST http://<API-IP>/analyze \
+-H "Content-Type: application/json" \
+-d '{"rpm":3000,"temp":95,"battery":12.5}'
